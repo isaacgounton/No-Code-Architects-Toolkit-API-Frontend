@@ -1,6 +1,6 @@
-import React from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { GripVertical, X } from 'lucide-react';
+import { VideoPreview } from './VideoPreview';
 
 interface Video {
   id: string;
@@ -13,7 +13,7 @@ interface VideoConcatenationProps {
 }
 
 export function VideoConcatenation({ videos, onVideosChange }: VideoConcatenationProps) {
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     
     const items = Array.from(videos);
@@ -34,7 +34,7 @@ export function VideoConcatenation({ videos, onVideosChange }: VideoConcatenatio
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="space-y-2"
+            className="space-y-4"
           >
             {videos.map((video, index) => (
               <Draggable key={video.id} draggableId={video.id} index={index}>
@@ -42,17 +42,21 @@ export function VideoConcatenation({ videos, onVideosChange }: VideoConcatenatio
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-                    className="flex items-center bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm"
+                    className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg"
                   >
-                    <div {...provided.dragHandleProps} className="mr-3">
-                      <GripVertical className="text-gray-400" />
+                    <div {...provided.dragHandleProps}>
+                      <GripVertical className="h-5 w-5 text-gray-500" />
                     </div>
-                    <span className="flex-1 truncate">{video.url}</span>
+                    <div className="w-48 h-24 relative">
+                      <VideoPreview url={video.url} />
+                    </div>
+                    <div className="flex-1 truncate">{video.url}</div>
                     <button
                       onClick={() => removeVideo(video.id)}
-                      className="ml-2 text-gray-400 hover:text-red-500"
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                      aria-label={`Remove video ${video.url}`}
                     >
-                      <X size={18} />
+                      <X className="h-5 w-5" />
                     </button>
                   </div>
                 )}

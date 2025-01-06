@@ -13,23 +13,20 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-950/95">
-      <div className="container flex h-14 items-center">
+    <header className="sticky top-0 z-40 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-950/95">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-2">
-          <Terminal className="h-6 w-6" />
-          <span className="font-bold">No-Code Architects Toolkit</span>
+          <Terminal className="h-8 w-8" />
+          <span className="text-xl font-bold">No-Code Architects Toolkit</span>
         </div>
 
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex items-center space-x-2 md:w-auto">
-            <div className={cn(
-              "px-3 py-1 rounded-full text-sm",
-              apiKey ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-            )}>
-              {apiKey ? "Authenticated" : "Not Authenticated"}
-            </div>
+        <div className="flex items-center space-x-4">
+          <div className={cn(
+            "px-3 py-1 rounded-full text-sm",
+            apiKey ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          )}>
+            {apiKey ? "Authenticated" : "Not Authenticated"}
           </div>
-
           <button
             onClick={toggleTheme}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 w-9"

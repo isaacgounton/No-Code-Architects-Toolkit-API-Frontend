@@ -28,8 +28,11 @@ export function VideoUrlInput({ onAdd }: VideoUrlInputProps) {
       <button
         type="submit"
         className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+        aria-label="Add video URL"
+        title="Add video URL"
       >
-        <Plus className="h-4 w-4" />
+        <Plus className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">Add video URL</span>
       </button>
     </form>
   );

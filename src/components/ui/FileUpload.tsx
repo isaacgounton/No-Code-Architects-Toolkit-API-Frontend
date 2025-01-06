@@ -8,9 +8,10 @@ interface FileUploadProps {
   accept?: Record<string, string[]>;
   maxSize?: number;
   className?: string;
+  multiple?: boolean;
 }
 
-export function FileUpload({ onFileSelect, accept, maxSize, className }: FileUploadProps) {
+export function FileUpload({ onFileSelect, accept, maxSize, multiple = false, className }: FileUploadProps) {
   const onDrop = React.useCallback((acceptedFiles: File[]) => {
     onFileSelect(acceptedFiles);
   }, [onFileSelect]);
@@ -19,6 +20,7 @@ export function FileUpload({ onFileSelect, accept, maxSize, className }: FileUpl
     onDrop,
     accept,
     maxSize,
+    multiple,
   });
 
   return (

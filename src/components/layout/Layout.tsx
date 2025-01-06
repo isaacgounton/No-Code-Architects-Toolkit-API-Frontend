@@ -9,7 +9,7 @@ export function Layout() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       <Sidebar />
-      <main className="lg:pl-72 pt-14"> {/* Added pt-14 for header spacing */}
+      <main className="lg:pl-72 pt-16">
         <div className="px-4 py-8 sm:px-6 lg:px-8">
           <Outlet />
         </div>

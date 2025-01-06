@@ -6,6 +6,7 @@ import { VideoConcatenation } from '../components/video/VideoConcatenation';
 import { VideoUrlInput } from '../components/video/VideoUrlInput';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import toast from 'react-hot-toast';
+import { Button } from '../components/ui/Button';
 
 interface Video {
   id: string;
@@ -19,8 +20,9 @@ export default function VideoProcessing() {
   const [captionSettings, setCaptionSettings] = React.useState({
     fontSize: 24,
     fontColor: '#ffffff',
-    position: 'bottom' as const,
-    style: 'default' as const,
+    position: 'bottom' as 'top' | 'middle' | 'bottom',
+    style: 'default' as 'default' | 'highlight' | 'karaoke' | 'outline',
+    fontFamily: 'Arial',
   });
 
   const handleFileSelect = (files: File[]) => {
@@ -70,6 +72,8 @@ export default function VideoProcessing() {
                 <VideoPreview
                   url={videoUrl}
                   onError={() => toast.error('Error loading video')}
+                  showControls={true}
+                  className="w-full aspect-video rounded-lg"
                 />
               )}
             </div>
@@ -79,17 +83,17 @@ export default function VideoProcessing() {
                 <h2 className="text-lg font-semibold mb-4">Caption Settings</h2>
                 <CaptionSettings
                   settings={captionSettings}
-                  onChange={setCaptionSettings}
+                  onChange={(newSettings) => setCaptionSettings(newSettings)}
                 />
               </div>
 
-              <button
+              <Button 
                 onClick={handleProcess}
                 disabled={!videoFile}
-                className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full"
               >
                 Process Video
-              </button>
+              </Button>
             </div>
           </div>
         </TabsContent>

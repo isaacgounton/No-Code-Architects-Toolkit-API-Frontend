@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Layout } from './components/layout/Layout';
 
 // Lazy load pages
@@ -12,73 +13,46 @@ const CodeExecution = React.lazy(() => import('./pages/CodeExecution'));
 const JobHistory = React.lazy(() => import('./pages/JobHistory'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 
+function LoadingFallback() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p className="text-gray-600 dark:text-gray-400">Loading page...</p>
+    </div>
+  );
+}
+
+function ErrorFallback({ error }: { error: Error }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <p className="text-red-600">Error loading page: {error.message}</p>
+    </div>
+  );
+}
+
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Navigate to="/video" replace />} />
-            <Route
-              path="video"
-              element={
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <VideoProcessing />
-                </React.Suspense>
-              }
-            />
-            <Route
-              path="image"
-              element={
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <ImageProcessing />
-                </React.Suspense>
-              }
-            />
-            <Route
-              path="media"
-              element={
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <MediaProcessing />
-                </React.Suspense>
-              }
-            />
-            <Route
-              path="ffmpeg"
-              element={
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <FFmpegCompose />
-                </React.Suspense>
-              }
-            />
-            <Route
-              path="code"
-              element={
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <CodeExecution />
-                </React.Suspense>
-              }
-            />
-            <Route
-              path="history"
-              element={
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <JobHistory />
-                </React.Suspense>
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <Settings />
-                </React.Suspense>
-              }
-            />
-          </Route>
-        </Routes>
+        <React.Suspense fallback={<LoadingFallback />}>
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route index element={<Navigate to="/video" replace />} />
+                <Route path="/video" element={<VideoProcessing />} />
+                <Route path="/image" element={<ImageProcessing />} />
+                <Route path="/media" element={<MediaProcessing />} />
+                <Route path="/ffmpeg" element={<FFmpegCompose />} />
+                <Route path="/code" element={<CodeExecution />} />
+                <Route path="/history" element={<JobHistory />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="*" element={<Navigate to="/video" replace />} />
+              </Route>
+            </Routes>
+          </ErrorBoundary>
+        </React.Suspense>
       </BrowserRouter>
     </QueryClientProvider>
   );

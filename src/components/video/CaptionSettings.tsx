@@ -1,73 +1,89 @@
-import React from 'react';
+import { type ChangeEvent } from 'react';
+import { Select } from '../ui/Select';
+import { Input } from '../ui/Input';
+import { Slider } from '../ui/Slider';
 
 interface CaptionSettingsProps {
-  onChange: (settings: CaptionSettings) => void;
-  settings: CaptionSettings;
+  settings: {
+    fontSize: number;
+    fontColor: string;
+    position: 'top' | 'middle' | 'bottom';
+    style: 'default' | 'highlight' | 'karaoke' | 'outline';
+    fontFamily: string;
+  };
+  onChange: (settings: CaptionSettingsProps['settings']) => void;
 }
 
-interface CaptionSettings {
-  fontSize: number;
-  fontColor: string;
-  position: 'top' | 'bottom';
-  style: 'default' | 'highlight' | 'karaoke';
-}
+const fonts = [
+  'Arial',
+  'Helvetica',
+  'Times New Roman',
+  'Courier New',
+  'Georgia',
+  'Impact',
+];
 
-export function CaptionSettings({ onChange, settings }: CaptionSettingsProps) {
+const positions = [
+  { value: 'top', label: 'Top' },
+  { value: 'middle', label: 'Middle' },
+  { value: 'bottom', label: 'Bottom' },
+];
+
+const styles = [
+  { value: 'default', label: 'Default' },
+  { value: 'highlight', label: 'Highlight' },
+  { value: 'karaoke', label: 'Karaoke' },
+  { value: 'outline', label: 'Outline' },
+];
+
+export function CaptionSettings({ settings, onChange }: CaptionSettingsProps) {
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Font Size
-        </label>
-        <input
-          type="range"
-          min="12"
-          max="48"
-          value={settings.fontSize}
-          onChange={(e) => onChange({ ...settings, fontSize: Number(e.target.value) })}
-          className="w-full"
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Font Family</label>
+        <Select
+          value={settings.fontFamily}
+          onValueChange={(value: string) => onChange({ ...settings, fontFamily: value })}
+          options={fonts.map(font => ({ value: font, label: font }))}
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Font Color
-        </label>
-        <input
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Font Size</label>
+        <Slider
+          min={12}
+          max={72}
+          step={1}
+          value={[settings.fontSize]}
+          onValueChange={([value]) => onChange({ ...settings, fontSize: value })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Font Color</label>
+        <Input
           type="color"
           value={settings.fontColor}
-          onChange={(e) => onChange({ ...settings, fontColor: e.target.value })}
-          className="h-8 w-8"
+          onChange={(e: ChangeEvent<HTMLInputElement>) => onChange({ ...settings, fontColor: e.target.value })}
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Position
-        </label>
-        <select
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Position</label>
+        <Select<CaptionSettingsProps['settings']['position']>
           value={settings.position}
-          onChange={(e) => onChange({ ...settings, position: e.target.value as 'top' | 'bottom' })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-        >
-          <option value="top">Top</option>
-          <option value="bottom">Bottom</option>
-        </select>
+          onValueChange={(value) => onChange({ ...settings, position: value })}
+          options={positions as Array<{ value: CaptionSettingsProps['settings']['position']; label: string }>}
+        />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Style
-        </label>
-        <select
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Style</label>
+        <Select<CaptionSettingsProps['settings']['style']>
           value={settings.style}
-          onChange={(e) => onChange({ ...settings, style: e.target.value as 'default' | 'highlight' | 'karaoke' })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-        >
-          <option value="default">Default</option>
-          <option value="highlight">Highlight</option>
-          <option value="karaoke">Karaoke</option>
-        </select>
+          onValueChange={(value) => onChange({ ...settings, style: value })}
+          options={styles as Array<{ value: CaptionSettingsProps['settings']['style']; label: string }>}
+        />
       </div>
     </div>
   );

@@ -1,23 +1,20 @@
 import React from 'react';
-import ReactPlayer from 'react-player';
+import { cn } from '../../lib/utils';
 
-interface VideoPreviewProps {
+export interface VideoPreviewProps {
   url: string;
-  onReady?: () => void;
-  onError?: (error: Error) => void;
+  onError?: () => void;
+  showControls?: boolean;
+  className?: string;
 }
 
-export function VideoPreview({ url, onReady, onError }: VideoPreviewProps) {
+export function VideoPreview({ url, onError, showControls = false, className }: VideoPreviewProps) {
   return (
-    <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-      <ReactPlayer
-        url={url}
-        width="100%"
-        height="100%"
-        controls
-        onReady={onReady}
-        onError={onError}
-      />
-    </div>
+    <video
+      src={url}
+      controls={showControls}
+      onError={onError}
+      className={cn("w-full h-full object-cover", className)}
+    />
   );
 }

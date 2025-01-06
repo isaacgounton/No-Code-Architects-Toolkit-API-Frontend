@@ -2,7 +2,9 @@ import React from 'react';
 import { cn } from '../../lib/utils';
 
 interface TabsProps {
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
   children: React.ReactNode;
 }
 
@@ -26,11 +28,18 @@ const TabsContext = React.createContext<{
   setValue: (value: string) => void;
 } | null>(null);
 
-export function Tabs({ defaultValue, children }: TabsProps) {
-  const [value, setValue] = React.useState(defaultValue);
+export function Tabs({ defaultValue, value, onValueChange, children }: TabsProps) {
+  const [internalValue, setInternalValue] = React.useState(defaultValue);
+
+  const handleChange = (newValue: string) => {
+    setInternalValue(newValue);
+    if (onValueChange) {
+      onValueChange(newValue);
+    }
+  };
 
   return (
-    <TabsContext.Provider value={{ value, setValue }}>
+    <TabsContext.Provider value={{ value: value ?? internalValue ?? '', setValue: handleChange }}>
       <div className="space-y-4">
         {children}
       </div>

@@ -23,27 +23,28 @@ const navigation = [
 
 export function Sidebar() {
   return (
-    <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
-      <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 dark:bg-gray-950 dark:border-gray-800">
-        <nav className="flex flex-1 flex-col pt-8">
+    <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col bg-gray-100 dark:bg-gray-900 pt-16"> {/* Added pt-16 for spacing */}
+      <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 dark:border-gray-800 px-6 py-4">
+        <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
-              <ul role="list" className="-mx-2 space-y-1">
+              <ul role="list" className="space-y-1">
                 {navigation.map((item) => (
                   <li key={item.name}>
                     <NavLink
                       to={item.href}
+                      end
                       className={({ isActive }) =>
                         cn(
-                          'group flex gap-x-3 rounded-md p-2 text-sm leading-6',
+                          'relative flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 hover:bg-gray-200 dark:hover:bg-gray-800',
                           isActive
-                            ? 'bg-gray-50 text-blue-600 dark:bg-gray-800'
-                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
+                            ? 'text-blue-600 bg-blue-50 dark:bg-gray-800 dark:text-blue-400'
+                            : 'text-gray-700 dark:text-gray-300'
                         )
                       }
                     >
-                      <item.icon className="h-6 w-6 shrink-0" />
-                      {item.name}
+                      <item.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                      <span className="truncate">{item.name}</span>
                     </NavLink>
                   </li>
                 ))}
