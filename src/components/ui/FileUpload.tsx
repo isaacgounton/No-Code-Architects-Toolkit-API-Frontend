@@ -11,13 +11,19 @@ interface FileUploadProps {
   multiple?: boolean;
 }
 
-export function FileUpload({ onFileSelect, accept, maxSize, multiple = false, className }: FileUploadProps) {
-  const onDrop = React.useCallback((acceptedFiles: File[]) => {
-    onFileSelect(acceptedFiles);
-  }, [onFileSelect]);
-
+export function FileUpload({
+  onFileSelect,
+  accept,
+  maxSize,
+  multiple = false,
+  className
+}: FileUploadProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles?.length > 0) {
+        onFileSelect(acceptedFiles);
+      }
+    },
     accept,
     maxSize,
     multiple,
@@ -28,13 +34,13 @@ export function FileUpload({ onFileSelect, accept, maxSize, multiple = false, cl
       {...getRootProps()}
       className={cn(
         "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-        isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400",
+        isDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 hover:border-gray-400",
         className
       )}
     >
       <input {...getInputProps()} />
       <Upload className="mx-auto h-12 w-12 text-gray-400" />
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
         {isDragActive ? "Drop the files here" : "Drag & drop files here, or click to select files"}
       </p>
     </div>

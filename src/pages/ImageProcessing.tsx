@@ -13,6 +13,7 @@ export default function ImageProcessing() {
   const [imageUrl, setImageUrl] = React.useState('');
   const [previewUrl, setPreviewUrl] = React.useState('');
   const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const { isAuthenticated } = useAuthStore();
   const [progress, setProgress] = React.useState(0);
   
@@ -31,20 +32,58 @@ export default function ImageProcessing() {
 
   const handleFileSelect = async (files: File[]) => {
     if (files[0]) {
-      const url = URL.createObjectURL(files[0]);
-      setPreviewUrl(url);
-      setImageUrl(url);
-      toast.success('Image uploaded successfully');
+      const file = files[0];
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const newPreviewUrl = URL.createObjectURL(file);
+      setPreviewUrl(newPreviewUrl);
+
+      try {
+        // Upload to backend
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('http://localhost:5000/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload image');
+        }
+
+        const data = await response.json();
+        setImageUrl(data.url);
+        toast.success('Image uploaded successfully');
+      } catch (error) {
+        toast.error('Failed to upload image');
+        console.error(error);
+      }
     }
   };
 
   const handleUrlSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (imageUrl) {
+      // Clean up any existing file preview
+      if (selectedFile) {
+        URL.revokeObjectURL(previewUrl);
+        setSelectedFile(null);
+      }
       setPreviewUrl(imageUrl);
       toast.success('Image URL loaded');
     }
   };
+
+  // Clean up URLs when component unmounts
+  React.useEffect(() => {
+    return () => {
+      if (previewUrl && selectedFile) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, []);
 
   const handleProcess = async () => {
     if (!isAuthenticated) {
@@ -209,8 +248,25 @@ export default function ImageProcessing() {
 
         <div className="space-y-6">
           <div className="border rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-4">Image Preview</h2>
-            {previewUrl ? (
+            <h2 className="text-lg font-semibold mb-4">
+              {videoUrl ? 'Generated Video' : 'Image Preview'}
+            </h2>
+            {videoUrl ? (
+              <div className="space-y-4">
+                <video 
+                  src={videoUrl} 
+                  controls 
+                  className="w-full h-auto rounded-lg"
+                />
+                <Button
+                  onClick={() => window.open(videoUrl, '_blank')}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Download Video
+                </Button>
+              </div>
+            ) : previewUrl ? (
               <img
                 src={previewUrl}
                 alt="Preview"
@@ -222,24 +278,6 @@ export default function ImageProcessing() {
               </div>
             )}
           </div>
-
-          {videoUrl && (
-            <div className="border rounded-lg p-4">
-              <h2 className="text-lg font-semibold mb-4">Generated Video</h2>
-              <video 
-                src={videoUrl} 
-                controls 
-                className="w-full rounded-lg"
-              />
-              <Button
-                onClick={() => window.open(videoUrl, '_blank')}
-                variant="outline"
-                className="mt-4 w-full"
-              >
-                Download Video
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </div>

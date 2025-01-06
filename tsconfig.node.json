@@ -1,5 +1,7 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     "target": "ES2022",
     "lib": ["ESNext"],
     "module": "ESNext",
@@ -11,14 +13,16 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true,
+
+    /* Output */
+    "outDir": "./dist-node",
+    "rootDir": "./",
 
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "jsx": "react-jsx" // Add this line
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["vite.config.ts"]
 }
