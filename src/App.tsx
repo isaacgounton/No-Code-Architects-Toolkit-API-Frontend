@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Layout } from './components/layout/Layout';
+import { StationsProvider } from './context/StationsContext';
 
 // Lazy load pages
 const VideoProcessing = React.lazy(() => import('./pages/VideoProcessing'));
@@ -35,25 +36,27 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <React.Suspense fallback={<LoadingFallback />}>
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route index element={<Navigate to="/video" replace />} />
-                <Route path="/video" element={<VideoProcessing />} />
-                <Route path="/image" element={<ImageProcessing />} />
-                <Route path="/media" element={<MediaProcessing />} />
-                <Route path="/ffmpeg" element={<FFmpegCompose />} />
-                <Route path="/code" element={<CodeExecution />} />
-                <Route path="/history" element={<JobHistory />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="*" element={<Navigate to="/video" replace />} />
-              </Route>
-            </Routes>
-          </ErrorBoundary>
-        </React.Suspense>
-      </BrowserRouter>
+      <StationsProvider>
+        <BrowserRouter>
+          <React.Suspense fallback={<LoadingFallback />}>
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route index element={<Navigate to="/video" replace />} />
+                  <Route path="/video" element={<VideoProcessing />} />
+                  <Route path="/image" element={<ImageProcessing />} />
+                  <Route path="/media" element={<MediaProcessing />} />
+                  <Route path="/ffmpeg" element={<FFmpegCompose />} />
+                  <Route path="/code" element={<CodeExecution />} />
+                  <Route path="/history" element={<JobHistory />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="*" element={<Navigate to="/video" replace />} />
+                </Route>
+              </Routes>
+            </ErrorBoundary>
+          </React.Suspense>
+        </BrowserRouter>
+      </StationsProvider>
     </QueryClientProvider>
   );
 }

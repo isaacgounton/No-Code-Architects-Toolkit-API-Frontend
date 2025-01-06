@@ -5,7 +5,7 @@ import { cn } from '../../lib/utils';
 
 export function Header() {
   const [isDark, setIsDark] = React.useState(false);
-  const { apiKey } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -23,9 +23,9 @@ export function Header() {
         <div className="flex items-center space-x-4">
           <div className={cn(
             "px-3 py-1 rounded-full text-sm",
-            apiKey ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+            isAuthenticated ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
           )}>
-            {apiKey ? "Authenticated" : "Not Authenticated"}
+            {isAuthenticated ? "Authenticated" : "Not Authenticated"}
           </div>
           <button
             onClick={toggleTheme}

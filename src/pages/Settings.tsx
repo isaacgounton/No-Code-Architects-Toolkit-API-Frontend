@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '../lib/store';
 import toast from 'react-hot-toast';
+import { API_KEY } from '../lib/api';
 
 const settingsSchema = z.object({
   apiKey: z.string().min(1, 'API Key is required'),
@@ -16,7 +17,7 @@ export default function Settings() {
   const { register, handleSubmit, formState: { errors } } = useForm<SettingsForm>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      apiKey: apiKey || '',
+      apiKey: apiKey || API_KEY || '',
     },
   });
 
