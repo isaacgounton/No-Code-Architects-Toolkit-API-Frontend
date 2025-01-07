@@ -1,0 +1,152 @@
+Create a modern, responsive web application for the No-Code Architects Toolkit API with the following features and requirements:
+
+Purpose:
+Build a comprehensive frontend interface that allows users to interact with all available API endpoints in an intuitive way.
+
+Core Features:
+1. Authentication:
+- API key input and storage
+- Session management
+- Authentication status indicator
+
+2. Video Processing:
+- Video captioning interface with customizable settings:
+  * Font selection, size, color
+  * Caption positioning
+  * Style options (highlight, karaoke, etc.)
+- Video concatenation tool with:
+  * Multiple video URL inputs
+  * Drag-and-drop reordering
+  * Preview functionality
+
+3. Image Processing:
+- Image to video conversion with controls for:
+  * Video length
+  * Frame rate
+  * Zoom speed
+  * Preview functionality
+
+4. Media Processing:
+- Media to MP3 conversion with:
+  * Bitrate selection
+  * Progress tracking
+  * Download management
+- Media transcription interface with:
+  * Language selection
+  * Format options (SRT, plain text)
+  * Word-level timestamp toggle
+
+5. FFmpeg Compose:
+- Advanced FFmpeg command builder with:
+  * Input file management
+  * Filter configuration
+  * Output options
+  * Metadata selection
+
+6. Code Execution:
+- Python code editor with:
+  * Syntax highlighting
+  * Code validation
+  * Execution timeout control
+  * Output display
+
+Technical Requirements:
+
+1. UI/UX:
+- Modern, clean design
+- Dark/light theme support
+- Responsive layout (mobile, tablet, desktop)
+- Loading states and progress indicators
+- Error handling and user feedback
+- Toast notifications for operations
+- Drag-and-drop file uploads
+
+2. State Management:
+- API key persistence
+- Form state management
+- Job history tracking
+- Queue status monitoring
+
+3. Components:
+- File upload zones
+- Progress bars
+- Preview players
+- Settings panels
+- Code editor
+- Result viewers
+- Job history table
+
+4. API Integration:
+- Webhook handling
+- Response caching
+- Error handling
+- Rate limiting feedback
+- Queue management
+
+Layout Structure:
+
+1. Header:
+- Logo
+- API key input
+- Theme toggle
+- Authentication status
+
+2. Sidebar:
+- Navigation menu
+- Recent jobs
+- Queue status
+
+3. Main Content Area:
+- Tool-specific interfaces
+- Form inputs
+- Preview areas
+- Results display
+
+4. Footer:
+- API status
+- Documentation links
+- Version info
+
+Styling Guidelines:
+- Professional color scheme
+- Consistent spacing
+- Clear typography
+- Intuitive icons
+- Smooth transitions
+- Responsive breakpoints
+
+Additional Features:
+- Job history and management
+- Batch processing capabilities
+- Export/import settings
+- Keyboard shortcuts
+- API usage statistics
+- Error logging and reporting
+
+Technical Stack Preferences:
+- React or Vue.js
+- TypeScript
+- Tailwind CSS
+- State management (Redux/Vuex)
+- Form validation library
+- Code editor component
+- Media player component
+- File upload handling
+
+Focus on creating an intuitive, efficient interface that makes it easy for users to:
+1. Process media files
+2. Monitor job status
+3. Manage multiple operations
+4. View and download results
+5. Handle errors gracefully
+6. Save and reuse settings
+
+Ensure the UI provides clear feedback for:
+- API key validation
+- Input validation
+- Processing status
+- Queue position
+- Error messages
+- Success confirmations
+
+Design the interface to be both powerful for advanced users and accessible for beginners, with appropriate documentation and tooltips throughout the application.

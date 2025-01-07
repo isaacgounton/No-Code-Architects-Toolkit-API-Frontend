@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -12,5 +13,13 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
+  },
+  resolve: {
+    alias: {
+      'buffer': path.resolve(__dirname, 'node_modules/buffer'),
+      'util': path.resolve(__dirname, 'node_modules/util'),
+      'path': path.resolve(__dirname, 'node_modules/path-browserify'),
+      'stream': path.resolve(__dirname, 'node_modules/stream-browserify'),
+    },
   },
 });

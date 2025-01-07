@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Layout } from './components/layout/Layout';
 import { StationsProvider } from './context/StationsContext';
+import Home from './pages/Home';
 
 // Lazy load pages
 const VideoProcessing = React.lazy(() => import('./pages/VideoProcessing'));
@@ -23,7 +24,10 @@ function LoadingFallback() {
   );
 }
 
+import toast from 'react-hot-toast';
+
 function ErrorFallback({ error }: { error: Error }) {
+  toast.error(error.message);
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
       <p className="text-red-600">Error loading page: {error.message}</p>
@@ -42,7 +46,7 @@ function App() {
             <ErrorBoundary FallbackComponent={ErrorFallback}>
               <Routes>
                 <Route element={<Layout />}>
-                  <Route index element={<Navigate to="/video" replace />} />
+                  <Route index element={<Home />} />
                   <Route path="/video" element={<VideoProcessing />} />
                   <Route path="/image" element={<ImageProcessing />} />
                   <Route path="/media" element={<MediaProcessing />} />
