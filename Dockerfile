@@ -17,9 +17,5 @@ RUN npm run build
 # Expose the port the app runs on
 EXPOSE 3005
 
-ENV PORT 3005
-ENV HOSTNAME "0.0.0.0"
-ENV NODE_ENV production
-
 # Start the application
 CMD ["npm", "start"]
