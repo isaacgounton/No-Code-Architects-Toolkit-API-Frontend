@@ -12,32 +12,45 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const minioClient = new Client({
   endPoint: process.env.VITE_MINIO_ENDPOINT,
-  port: 9000,
-  useSSL: true,
+  port: parseInt(process.env.VITE_MINIO_PORT || '9000'), // Use environment variable for port
+  useSSL: process.env.VITE_MINIO_USE_SSL === 'true', // Use environment variable for SSL
   accessKey: process.env.VITE_MINIO_ACCESS_KEY,
   secretKey: process.env.VITE_MINIO_SECRET_KEY,
 });
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.VITE_FRONTEND_URL || 'http://localhost:3000', // Allow requests from frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
     const file = req.file;
     const bucketName = process.env.VITE_MINIO_BUCKET_NAME;
     const fileName = `${Date.now()}-${file.originalname}`;
 
     // Ensure bucket exists
-    const bucketExists = await minioClient.bucketExists(bucketName);
-    if (!bucketExists) {
-      await minioClient.makeBucket(bucketName);
+    try {
+      const bucketExists = await minioClient.bucketExists(bucketName);
+      if (!bucketExists) {
+        await minioClient.makeBucket(bucketName);
+      }
+    } catch (error) {
+      console.error('Error checking/creating bucket:', error);
+      return res.status(500).json({ error: 'Failed to process bucket' });
     }
 
     // Upload file
     await minioClient.putObject(bucketName, fileName, file.buffer);
 
     // Generate public URL
-    const publicUrl = `https://${process.env.VITE_MINIO_ENDPOINT}/${bucketName}/${fileName}`;
+    const publicUrl = await minioClient.presignedGetObject(bucketName, fileName, 24 * 60 * 60); // URL valid for 24 hours
     res.json({ url: publicUrl });
   } catch (error) {
     console.error('Error uploading file:', error);
