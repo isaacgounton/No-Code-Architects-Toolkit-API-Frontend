@@ -1,12 +1,11 @@
-import express from 'express';
-import multer from 'multer';
-import { Client } from 'minio';
-import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
+const express = require('express');
+const multer = require('multer');
+const { Client } = require('minio');
+const cors = require('cors');
+const path = require('path');
+const dotenv = require('dotenv');
 
-const __filename = fileURLToPath(import.meta.url);
+const __filename = __filename || path.resolve(__dirname, 'server.js');
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });

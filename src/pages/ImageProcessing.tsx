@@ -8,6 +8,8 @@ import { convertImageToVideo } from '../lib/api/image';
 import { useAuthStore } from '../lib/store';
 import { Progress } from '../components/ui/Progress';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 export default function ImageProcessing() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [imageUrl, setImageUrl] = React.useState('');
@@ -44,7 +46,7 @@ export default function ImageProcessing() {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch('http://localhost:5000/upload', {
+        const response = await fetch(`${backendUrl}/upload`, {
           method: 'POST',
           body: formData,
         });
