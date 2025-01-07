@@ -85,7 +85,7 @@ export default function ImageProcessing() {
         URL.revokeObjectURL(previewUrl);
       }
     };
-  }, []);
+  }, [previewUrl, selectedFile]);
 
   const handleProcess = async () => {
     if (!isAuthenticated) {

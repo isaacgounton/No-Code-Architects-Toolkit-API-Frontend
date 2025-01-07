@@ -7,7 +7,7 @@ import { VideoUrlInput } from '../components/video/VideoUrlInput';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
-import { captionVideo, concatenateVideos, getJobProgress } from '../lib/api/video';
+import { captionVideo, concatenateVideos } from '../lib/api/video';
 
 interface Video {
   id: string;
@@ -18,7 +18,6 @@ export default function VideoProcessing() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoSourceUrl, setVideoSourceUrl] = useState<string>('');
-  const [processedVideoUrl, setProcessedVideoUrl] = useState<string>('');
   const [videos, setVideos] = useState<Video[]>([]);
   interface Caption {
     text: string;
@@ -56,55 +55,26 @@ export default function VideoProcessing() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
-  const [jobId, setJobId] = useState<string | null>(null);
-
+  
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    let retryCount = 0;
-    const maxRetries = 3;
-    
-    if (jobId) {
-      const trackProgress = async () => {
-        try {
-          const progress = await getJobProgress(jobId);
-          setProcessingProgress(progress.progress || 0);
-          
-          if (progress.preview_url) {
-            setProcessedVideoUrl(progress.preview_url);
-          }
-          
-          if (progress.progress === 100) {
+    let interval: NodeJS.Timeout | undefined;
+    if (isProcessing) {
+      interval = setInterval(() => {
+        setProcessingProgress(prev => {
+          if (prev >= 90) {
             clearInterval(interval);
-            setIsProcessing(false);
-            setJobId(null);
-            setProcessedVideoUrl(progress.output_url || '');
-            toast.success('Processing complete!');
+            return 90;
           }
-          retryCount = 0; // Reset retry count on success
-        } catch (error) {
-          retryCount++;
-          if (retryCount >= maxRetries) {
-            clearInterval(interval);
-            setIsProcessing(false);
-            setJobId(null);
-            toast.error('Failed to track progress after multiple attempts');
-            console.error('Progress tracking error:', error);
-          } else {
-            console.warn(`Progress tracking attempt ${retryCount} failed, retrying...`);
-          }
-        }
-      };
-
-      // Initial call
-      trackProgress();
-      // Then set up interval
-      interval = setInterval(trackProgress, 1000);
+          return prev + 10;
+        });
+      }, 500);
     }
-
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) {
+        clearInterval(interval);
+      }
     };
-  }, [jobId]);
+  }, [isProcessing]);
 
   const handleProcess = async () => {
     if (!videoFile && !videoSourceUrl) {
@@ -116,7 +86,7 @@ export default function VideoProcessing() {
     setProcessingProgress(0);
 
     try {
-    const response = await captionVideo({
+    await captionVideo({
       video_url: videoUrl,
       captions: captions.map(c => c.text).join('\n'),
       settings: {
@@ -126,11 +96,9 @@ export default function VideoProcessing() {
       }
     });
 
-      setJobId(response.job_id);
       toast.success('Processing started');
     } catch (error) {
       setIsProcessing(false);
-      setJobId(null);
       toast.error('Failed to start processing');
       console.error(error);
     }
@@ -146,15 +114,13 @@ export default function VideoProcessing() {
     setProcessingProgress(0);
 
     try {
-      const response = await concatenateVideos({
+      await concatenateVideos({
         video_urls: videos.map(v => ({video_url: v.url}))
       });
 
-      setJobId(response.job_id);
       toast.success('Concatenation started');
     } catch (error) {
       setIsProcessing(false);
-      setJobId(null);
       toast.error('Failed to start concatenation');
       console.error(error);
     }
@@ -214,26 +180,7 @@ export default function VideoProcessing() {
                   </button>
                 </form>
               </div>
-              {processedVideoUrl ? (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Processed Video Preview</h3>
-                    <VideoPreview
-                      url={processedVideoUrl}
-                      showControls={true}
-                      className="w-full aspect-video rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Original Video</h3>
-                    <VideoPreview
-                      url={videoUrl}
-                      showControls={true}
-                      className="w-full aspect-video rounded-lg"
-                    />
-                  </div>
-                </div>
-              ) : videoUrl && (
+              {videoUrl && (
                 <VideoPreview
                   url={videoUrl}
                   showControls={true}
