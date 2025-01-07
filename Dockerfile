@@ -36,5 +36,8 @@ COPY --from=build /app/dist ./dist
 EXPOSE 3000
 EXPOSE 5000
 
-# Start React on 3000 and Express server on 5000
-CMD ["sh", "-c", "serve -s dist -l 3000 & node server.cjs"]
+# Set environment variable for Express server port
+ENV PORT=5000
+
+# Start Express server on 5000 and React on 3000
+CMD ["sh", "-c", "node server.cjs & serve -s dist -l 3000"]
