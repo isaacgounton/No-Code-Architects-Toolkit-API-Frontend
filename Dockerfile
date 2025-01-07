@@ -1,43 +1,25 @@
-############################
-# Stage 1: Build React App #
-############################
-FROM node:18-alpine AS build
+FROM node:18-alpine
+
 WORKDIR /app
 
-# Copy dependency files
+# Copy package files
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy source and build
+# Copy the rest of the application
 COPY . .
+
+# Build the application
 RUN npm run build
 
-########################################
-# Stage 2: Run server and Serve React  #
-########################################
-FROM node:18-alpine
-WORKDIR /app
+# Expose the port the app runs on
+EXPOSE 3006
 
-# Copy server dependencies
-COPY package*.json ./
-RUN npm install
+ENV PORT 3006
+ENV HOSTNAME "0.0.0.0"
+ENV NODE_ENV production
 
-# Install serve so it's already available
-RUN npm install --global serve
-
-# Copy server code and env
-COPY server.cjs ./
-COPY .env ./
-
-# Copy built React app
-COPY --from=build /app/dist ./dist
-
-# Expose ports for React (3000) and server (5000)
-EXPOSE 3000
-EXPOSE 5000
-
-# Set environment variable for Express server port
-ENV PORT=5000
-
-# Start Express server on 5000 and React on 3000
-CMD ["sh", "-c", "node server.cjs & serve -s dist -l 3000"]
+# Start the application
+CMD ["npm", "start"]
