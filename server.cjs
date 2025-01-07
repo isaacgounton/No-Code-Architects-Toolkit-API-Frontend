@@ -19,7 +19,7 @@ const minioClient = new Client({
 });
 
 app.use(cors({
-  origin: process.env.VITE_FRONTEND_URL || 'http://localhost:3000', // Allow requests from frontend
+  origin: process.env.VITE_FRONTEND_URL || 'http://localhost:3005', // Allow requests from frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
