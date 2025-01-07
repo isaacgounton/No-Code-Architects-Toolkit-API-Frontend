@@ -15,9 +15,9 @@ COPY . .
 RUN npm run build
 
 # Expose the port the app runs on
-EXPOSE 3006
+EXPOSE 3005
 
-ENV PORT 3006
+ENV PORT 3005
 ENV HOSTNAME "0.0.0.0"
 ENV NODE_ENV production
 
