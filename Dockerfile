@@ -8,29 +8,33 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy the source and build
+# Copy source and build
 COPY . .
 RUN npm run build
 
 ########################################
-# Stage 2: Run Server & Serve React App #
+# Stage 2: Run server and Serve React  #
 ########################################
 FROM node:18-alpine
 WORKDIR /app
 
-# Copy necessary files for the server
+# Copy server dependencies
 COPY package*.json ./
 RUN npm install
 
+# Install serve so it's already available
+RUN npm install --global serve
+
+# Copy server code and env
 COPY server.cjs ./
 COPY .env ./
 
-# Copy the built React app from the previous stage
+# Copy built React app
 COPY --from=build /app/dist ./dist
 
-# Expose both ports
+# Expose ports for React (3000) and server (5000)
 EXPOSE 3000
 EXPOSE 5000
 
-# Start React on 3000 and the server on 5000
-CMD ["sh", "-c", "npx serve -s dist -l 3000 & node server.cjs"]
+# Start React on 3000 and Express server on 5000
+CMD ["sh", "-c", "serve -s dist -l 3000 & node server.cjs"]
