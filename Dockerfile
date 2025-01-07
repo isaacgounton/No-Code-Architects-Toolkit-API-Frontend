@@ -21,4 +21,4 @@ EXPOSE 3005
 RUN npm install -g serve
 
 # Serve the application
-CMD ["serve", "-s", "dist", "-l", "80"]
+CMD ["serve", "-s", "dist", "-l", "3005"]
