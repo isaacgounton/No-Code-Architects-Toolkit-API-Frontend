@@ -1,9 +1,15 @@
-const express = require('express');
-const multer = require('multer');
-const { Client } = require('minio');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+import express from 'express';
+import multer from 'multer';
+import { Client } from 'minio';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -35,10 +41,10 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     await minioClient.putObject(bucketName, fileName, file.buffer);
 
     // Generate public URL
-    const publicUrl = `${process.env.VITE_MINIO_ENDPOINT}/${bucketName}/${fileName}`;
+    const publicUrl = `https://${process.env.VITE_MINIO_ENDPOINT}/${bucketName}/${fileName}`;
     res.json({ url: publicUrl });
   } catch (error) {
-    console.error(error);
+    console.error('Error uploading file:', error);
     res.status(500).json({ error: 'Failed to upload file' });
   }
 });
