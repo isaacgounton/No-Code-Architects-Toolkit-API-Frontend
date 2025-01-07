@@ -42,6 +42,12 @@ COPY --from=build-frontend /app/dist ./dist
 COPY --from=build-backend /app/server.cjs ./
 COPY --from=build-backend /app/.env ./
 
+# Copy package.json and package-lock.json to install dependencies
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
 # Install serve to serve the frontend
 RUN npm install -g serve
 
