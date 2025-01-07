@@ -27,7 +27,7 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the backend server code
-COPY server.js ./
+COPY server.cjs ./
 COPY .env ./
 
 # Stage 3: Final stage
@@ -39,7 +39,7 @@ WORKDIR /app
 COPY --from=build-frontend /app/dist ./dist
 
 # Copy the backend server from the build-backend stage
-COPY --from=build-backend /app/server.js ./
+COPY --from=build-backend /app/server.cjs ./
 COPY --from=build-backend /app/.env ./
 
 # Install serve to serve the frontend
@@ -49,4 +49,4 @@ RUN npm install -g serve
 EXPOSE 5000
 
 # Start the backend server and serve the frontend
-CMD ["sh", "-c", "node server.js & serve -s dist -l 3000"]
+CMD ["sh", "-c", "node server.cjs & serve -s dist -l 3000"]

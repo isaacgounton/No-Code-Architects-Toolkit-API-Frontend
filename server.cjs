@@ -5,9 +5,6 @@ const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 
-const __filename = __filename || path.resolve(__dirname, 'server.js');
-const __dirname = path.dirname(__filename);
-
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const app = express();
