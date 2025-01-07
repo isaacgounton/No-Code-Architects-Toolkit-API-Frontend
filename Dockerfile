@@ -1,38 +1,36 @@
-# Stage 1: Build the React app
+############################
+# Stage 1: Build React App #
+############################
 FROM node:18-alpine AS build
-
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
-
-# Install dependencies
+# Copy dependency files
+COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the application code
+# Copy the source and build
 COPY . .
-
-# Build the application
 RUN npm run build
 
-# Stage 2: Serve the React app and run the server
+########################################
+# Stage 2: Run Server & Serve React App #
+########################################
 FROM node:18-alpine
-
 WORKDIR /app
+
+# Copy necessary files for the server
+COPY package*.json ./
+RUN npm install
+
+COPY server.cjs ./
+COPY .env ./
 
 # Copy the built React app from the previous stage
 COPY --from=build /app/dist ./dist
 
-# Copy the server code
-COPY server.cjs ./
-COPY .env ./
-
-# Install only server dependencies
-RUN npm install express multer minio cors dotenv
-
-# Expose ports
+# Expose both ports
 EXPOSE 3000
 EXPOSE 5000
 
-# Start both the React app and the server
+# Start React on 3000 and the server on 5000
 CMD ["sh", "-c", "npx serve -s dist -l 3000 & node server.cjs"]
