@@ -51,8 +51,8 @@ RUN npm install
 # Install serve to serve the frontend
 RUN npm install -g serve
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Expose the ports the app runs on
+EXPOSE 3000 5000
 
 # Start the backend server and serve the frontend
 CMD ["sh", "-c", "node server.cjs & serve -s dist -l 3000"]
