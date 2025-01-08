@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileUpload } from '../components/ui/FileUpload';
 import { VideoPreview } from '../components/video/VideoPreview';
 import { CaptionStyler } from '../components/video/CaptionStyler';
@@ -7,7 +7,7 @@ import { VideoUrlInput } from '../components/video/VideoUrlInput';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
-import { captionVideo, concatenateVideos, getJobProgress } from '../lib/api/video';
+import { captionVideo, concatenateVideos } from '../lib/api/video';
 import type { CaptionSettings, TextReplacement } from '../types/video';
 
 interface Video {
@@ -21,6 +21,7 @@ export default function VideoProcessing() {
   const [videoSourceUrl, setVideoSourceUrl] = useState<string>('');
   const [videos, setVideos] = useState<Video[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [captionText, setCaptionText] = useState<string>('');
   const [replacements, setReplacements] = useState<TextReplacement[]>([]);
   const [language, setLanguage] = useState<string>('auto');
@@ -65,9 +66,30 @@ export default function VideoProcessing() {
     }
   };
 
-  const handleLanguageChange = (newLanguage: string | undefined) => {
+    const handleLanguageChange = (newLanguage: string | undefined) => {
     setLanguage(newLanguage ?? 'auto');
   };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
+    if (isProcessing) {
+      interval = setInterval(() => {
+        setProcessingProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(interval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 500);
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isProcessing]);
+
 
   const handleProcess = async () => {
     if (!videoFile && !videoSourceUrl) {
@@ -76,43 +98,22 @@ export default function VideoProcessing() {
     }
 
     setIsProcessing(true);
+    setProcessingProgress(0);
 
     try {
       const response = await captionVideo({
         video_url: videoUrl,
-        captions: captionText || undefined,  // Will be undefined if empty string
+        captions: captionText || undefined,
         settings: captionSettings,
         replace: replacements.length > 0 ? replacements : undefined,
         language: language === 'auto' ? undefined : language,
-        id: crypto.randomUUID() // Add request ID for tracking
+        id: crypto.randomUUID()
       });
 
       if (response.response) {
         toast.success('Video processed successfully');
         setVideoUrl(response.response);
       }
-
-      // Start polling for progress
-      const progressInterval = setInterval(async () => {
-        try {
-          const progress = await getJobProgress(response.job_id);
-          
-          if (progress.status === 'completed') {
-            clearInterval(progressInterval);
-            if (progress.output_url) {
-              setVideoUrl(progress.output_url);
-            }
-          } else if (progress.status === 'failed') {
-            clearInterval(progressInterval);
-            throw new Error(progress.message || 'Processing failed');
-          }
-        } catch (error) {
-          clearInterval(progressInterval);
-          console.error('Error fetching job progress:', error);
-          toast.error('Failed to fetch job progress. Please check the server logs for more details.');
-        }
-      }, 1000);
-
     } catch (error) {
       setIsProcessing(false);
       if (error instanceof Error) {
@@ -130,6 +131,7 @@ export default function VideoProcessing() {
     }
 
     setIsProcessing(true);
+    setProcessingProgress(0);
 
     try {
       await concatenateVideos({
@@ -222,8 +224,17 @@ export default function VideoProcessing() {
                   disabled={!videoFile && !videoSourceUrl || isProcessing}
                   className="w-full"
                 >
-                  {isProcessing ? 'Processing...' : 'Process Video'}
+                  {isProcessing ? `Processing... ${processingProgress}%` : 'Process Video'}
                 </Button>
+                
+                {isProcessing && (
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div 
+                      className="bg-blue-600 h-2.5 rounded-full" 
+                      style={{ width: `${processingProgress}%` }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -238,7 +249,7 @@ export default function VideoProcessing() {
               disabled={videos.length < 2 || isProcessing}
               className="w-full"
             >
-              {isProcessing ? 'Concatenating...' : 'Concatenate Videos'}
+              {isProcessing ? `Concatenating... ${processingProgress}%` : 'Concatenate Videos'}
             </Button>
           )}
         </TabsContent>
