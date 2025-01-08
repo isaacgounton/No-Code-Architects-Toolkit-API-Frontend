@@ -9,39 +9,53 @@ interface SelectOption<T extends string> {
 }
 
 interface SelectProps<T extends string> {
+  label?: string;
   value: T;
   onValueChange: (value: T) => void;
-  options: SelectOption<T>[];
+  options: T[] | SelectOption<T>[];
   className?: string;
 }
 
 export function Select<T extends string>({ 
+  label,
   value, 
   onValueChange, 
   options, 
   className 
 }: SelectProps<T>) {
+  // Convert string[] to SelectOption[] if needed
+  const normalizedOptions: SelectOption<T>[] = options.map(opt => 
+    typeof opt === 'string' ? { value: opt, label: opt } : opt
+  );
+
   return (
     <SelectPrimitive.Root value={value} onValueChange={onValueChange}>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {label}
+        </label>
+      )}
       <SelectPrimitive.Trigger
         className={cn(
           "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
       >
-        <SelectPrimitive.Value />
+        <SelectPrimitive.Value>
+          {normalizedOptions.find(opt => opt.value === value)?.label || value}
+        </SelectPrimitive.Value>
         <SelectPrimitive.Icon>
           <ChevronDown className="h-4 w-4 opacity-50" />
         </SelectPrimitive.Icon>
       </SelectPrimitive.Trigger>
       <SelectPrimitive.Portal>
         <SelectPrimitive.Content
-          className="relative z-500 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80"
+          className="relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80"
           position="popper"
           sideOffset={5}
         >
           <SelectPrimitive.Viewport className="p-1">
-            {options.map((option) => (
+            {normalizedOptions.map((option) => (
               <SelectPrimitive.Item
                 key={option.value}
                 value={option.value}

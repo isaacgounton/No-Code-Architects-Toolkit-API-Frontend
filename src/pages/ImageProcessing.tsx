@@ -166,8 +166,15 @@ export default function ImageProcessing() {
                 placeholder="Or enter image URL"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
+                className="flex-1"
               />
-              <Button type="submit">Load URL</Button>
+              <Button 
+                type="submit"
+                variant="outline"  // Changed from "secondary" to "outline"
+                className="min-w-[100px] bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Load URL
+              </Button>
             </form>
           </div>
 

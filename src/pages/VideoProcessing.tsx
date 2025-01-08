@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { FileUpload } from '../components/ui/FileUpload';
 import { VideoPreview } from '../components/video/VideoPreview';
-import { CaptionSettings } from '../components/video/CaptionSettings';
+import { CaptionStyler } from '../components/video/CaptionStyler';
 import { VideoConcatenation } from '../components/video/VideoConcatenation';
 import { VideoUrlInput } from '../components/video/VideoUrlInput';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
 import { captionVideo, concatenateVideos } from '../lib/api/video';
+import type { 
+  CaptionSettings, 
+  TextReplacement, 
+  Caption, 
+  VideoPosition, 
+  CaptionStyle, 
+  TextAlignment 
+} from '../types/video';
 
 interface Video {
   id: string;
@@ -19,22 +27,32 @@ export default function VideoProcessing() {
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoSourceUrl, setVideoSourceUrl] = useState<string>('');
   const [videos, setVideos] = useState<Video[]>([]);
-  interface Caption {
-    text: string;
-    startTime: number;
-    endTime: number;
-  }
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
 
   const [captions, setCaptions] = useState<Caption[]>([]);
-  const [captionSettings, setCaptionSettings] = useState({
-    fontSize: 24,
-    fontColor: '#ffffff',
-    position: 'bottom_center' as 'bottom_left' | 'bottom_center' | 'bottom_right' |
-              'middle_left' | 'middle_center' | 'middle_right' |
-              'top_left' | 'top_center' | 'top_right',
-    style: 'classic' as 'classic' | 'karaoke' | 'highlight' | 'underline' | 'word_by_word',
-    fontFamily: 'Arial',
+  const [captionSettings, setCaptionSettings] = useState<CaptionSettings>({
+    line_color: '#ffffff',
+    word_color: '#000000',
+    outline_color: '#000000',
+    all_caps: false,
+    max_words_per_line: 10,
+    position: 'bottom_center',
+    alignment: 'center',
+    font_family: 'Arial',
+    font_size: 24,
+    bold: false,
+    italic: false,
+    underline: false,
+    strikeout: false,
+    style: 'classic',
+    outline_width: 2,
+    spacing: 2,
+    angle: 0,
+    shadow_offset: 2
   });
+
+  const [textReplacements, setTextReplacements] = useState<TextReplacement[]>([]);
 
   const handleFileSelect = async (files: File[]) => {
     const file = files[0];
@@ -53,9 +71,6 @@ export default function VideoProcessing() {
     }
   };
 
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingProgress, setProcessingProgress] = useState(0);
-  
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
     if (isProcessing) {
@@ -86,21 +101,25 @@ export default function VideoProcessing() {
     setProcessingProgress(0);
 
     try {
-    await captionVideo({
-      video_url: videoUrl,
-      captions: captions.map(c => c.text).join('\n'),
-      settings: {
-        font_size: 24,
-        position: 'bottom_center',
-        font_family: 'Arial'
-      }
-    });
+      const response = await captionVideo({
+        video_url: videoUrl,
+        captions: captions.map(c => c.text).join('\n'),
+        settings: captionSettings,
+        replace: textReplacements.length > 0 ? textReplacements : undefined,
+        language: 'en' // You might want to make this configurable
+      });
 
-      toast.success('Processing started');
+      if (response.response) {
+        toast.success('Video processed successfully');
+        // Handle the processed video URL
+      }
     } catch (error) {
       setIsProcessing(false);
-      toast.error('Failed to start processing');
-      console.error(error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to process video');
+      }
     }
   };
 
@@ -150,36 +169,21 @@ export default function VideoProcessing() {
                 maxSize={100 * 1024 * 1024}
               />
               
-              <div className="space-y-4">
-                <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (videoSourceUrl) {
-                      setVideoUrl(videoSourceUrl);
-                      if (videoFile) {
-                        URL.revokeObjectURL(videoUrl);
-                        setVideoFile(null);
-                      }
-                      toast.success('Video URL loaded');
+              <VideoUrlInput
+                value={videoSourceUrl}
+                onChange={setVideoSourceUrl}
+                onSubmit={() => {
+                  if (videoSourceUrl) {
+                    setVideoUrl(videoSourceUrl);
+                    if (videoFile) {
+                      URL.revokeObjectURL(videoUrl);
+                      setVideoFile(null);
                     }
-                  }} 
-                  className="flex gap-2"
-                >
-                  <input
-                    type="url"
-                    placeholder="Or enter video URL"
-                    value={videoSourceUrl}
-                    onChange={(e) => setVideoSourceUrl(e.target.value)}
-                    className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 dark:bg-gray-800 dark:border-gray-700"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  >
-                    Load URL
-                  </button>
-                </form>
-              </div>
+                    toast.success('Video URL loaded');
+                  }
+                }}
+              />
+
               {videoUrl && (
                 <VideoPreview
                   url={videoUrl}
@@ -192,11 +196,9 @@ export default function VideoProcessing() {
             <div className="space-y-6">
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
                 <h2 className="text-lg font-semibold mb-4">Caption Settings</h2>
-                <CaptionSettings
+                <CaptionStyler
                   settings={captionSettings}
-                  captions={captions}
-                  onCaptionsChange={setCaptions}
-                  onChange={(newSettings) => setCaptionSettings(newSettings)}
+                  onChange={setCaptionSettings}
                 />
               </div>
 
