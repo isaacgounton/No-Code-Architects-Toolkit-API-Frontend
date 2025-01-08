@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FileUpload } from '../components/ui/FileUpload';
 import { VideoPreview } from '../components/video/VideoPreview';
 import { CaptionStyler } from '../components/video/CaptionStyler';
@@ -21,7 +21,6 @@ export default function VideoProcessing() {
   const [videoSourceUrl, setVideoSourceUrl] = useState<string>('');
   const [videos, setVideos] = useState<Video[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingProgress, setProcessingProgress] = useState(0);
   const [captionText, setCaptionText] = useState<string>('');
   const [replacements, setReplacements] = useState<TextReplacement[]>([]);
   const [language, setLanguage] = useState<string>('auto');
@@ -70,26 +69,6 @@ export default function VideoProcessing() {
     setLanguage(newLanguage ?? 'auto');
   };
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-    if (isProcessing) {
-      interval = setInterval(() => {
-        setProcessingProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(interval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 500);
-    }
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isProcessing]);
-
   const handleProcess = async () => {
     if (!videoFile && !videoSourceUrl) {
       toast.error('Please select a video file or enter a URL first');
@@ -97,7 +76,6 @@ export default function VideoProcessing() {
     }
 
     setIsProcessing(true);
-    setProcessingProgress(0);
 
     try {
       const response = await captionVideo({
@@ -111,7 +89,6 @@ export default function VideoProcessing() {
 
       if (response.response) {
         toast.success('Video processed successfully');
-        // Handle the processed video URL
         setVideoUrl(response.response);
       }
 
@@ -119,7 +96,6 @@ export default function VideoProcessing() {
       const progressInterval = setInterval(async () => {
         try {
           const progress = await getJobProgress(response.job_id);
-          setProcessingProgress(progress.progress);
           
           if (progress.status === 'completed') {
             clearInterval(progressInterval);
@@ -154,7 +130,6 @@ export default function VideoProcessing() {
     }
 
     setIsProcessing(true);
-    setProcessingProgress(0);
 
     try {
       await concatenateVideos({
@@ -247,17 +222,8 @@ export default function VideoProcessing() {
                   disabled={!videoFile && !videoSourceUrl || isProcessing}
                   className="w-full"
                 >
-                  {isProcessing ? `Processing... ${processingProgress}%` : 'Process Video'}
+                  {isProcessing ? 'Processing...' : 'Process Video'}
                 </Button>
-                
-                {isProcessing && (
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                    <div 
-                      className="bg-blue-600 h-2.5 rounded-full" 
-                      style={{ width: `${processingProgress}%` }}
-                    />
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -272,7 +238,7 @@ export default function VideoProcessing() {
               disabled={videos.length < 2 || isProcessing}
               className="w-full"
             >
-              {isProcessing ? `Concatenating... ${processingProgress}%` : 'Concatenate Videos'}
+              {isProcessing ? 'Concatenating...' : 'Concatenate Videos'}
             </Button>
           )}
         </TabsContent>
