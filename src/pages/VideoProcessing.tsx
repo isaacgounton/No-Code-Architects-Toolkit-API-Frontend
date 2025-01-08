@@ -25,6 +25,7 @@ export default function VideoProcessing() {
   const [captionText, setCaptionText] = useState<string>('');
   const [replacements, setReplacements] = useState<TextReplacement[]>([]);
   const [language, setLanguage] = useState<string>('auto');
+  const [isLoading, setIsLoading] = useState(false);
 
   const [captionSettings, setCaptionSettings] = useState<CaptionSettings>({
     line_color: '#ffffff',
@@ -98,6 +99,7 @@ export default function VideoProcessing() {
     }
 
     setIsProcessing(true);
+    setIsLoading(true);
     setProcessingProgress(0);
     const interval: NodeJS.Timeout | undefined = setInterval(() => {
         setProcessingProgress(prev => {
@@ -109,22 +111,27 @@ export default function VideoProcessing() {
       }, 500);
 
     try {
+      const {x, y, ...restSettings} = captionSettings;
+      const apiSettings = {
+        ...restSettings,
+        ...(x !== 0 || y !== 0 ? {x, y} : {})
+      }
       const response = await captionVideo({
         video_url: videoUrl,
         captions: captionText || undefined,
-        settings: captionSettings,
+        settings: apiSettings,
         replace: replacements.length > 0 ? replacements : undefined,
         language: language === 'auto' ? undefined : language,
         id: crypto.randomUUID()
       });
 
       if (response.response) {
-        toast.success('Video processed successfully');
-        setVideoUrl(response.response);
-        setProcessingProgress(100);
-        if (interval) {
-          clearInterval(interval);
-        }
+          toast.success('Video processed successfully');
+          setVideoUrl(response.response);
+          setProcessingProgress(100);
+          if (interval) {
+            clearInterval(interval);
+          }
       }
     } catch (error) {
       setIsProcessing(false);
@@ -136,6 +143,8 @@ export default function VideoProcessing() {
       if (interval) {
         clearInterval(interval);
       }
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -236,10 +245,10 @@ export default function VideoProcessing() {
               <div className="space-y-4">
                 <Button 
                   onClick={handleProcess}
-                  disabled={!videoFile && !videoSourceUrl || isProcessing}
+                  disabled={!videoFile && !videoSourceUrl || isLoading}
                   className="w-full"
                 >
-                  {isProcessing ? `Processing... ${processingProgress}%` : 'Process Video'}
+                  {isLoading ? `Processing... ${processingProgress}%` : 'Process Video'}
                 </Button>
                 
                 {isProcessing && (
@@ -253,6 +262,27 @@ export default function VideoProcessing() {
               </div>
             </div>
           </div>
+          {videoUrl && (
+            <div className="border rounded-lg p-4">
+              <h2 className="text-lg font-semibold mb-4">
+                Generated Video
+              </h2>
+              <div className="space-y-4">
+                <video 
+                  src={videoUrl} 
+                  controls 
+                  className="w-full h-auto rounded-lg"
+                />
+                <Button
+                  onClick={() => window.open(videoUrl, '_blank')}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Download Video
+                </Button>
+              </div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="concatenation" className="space-y-6">
