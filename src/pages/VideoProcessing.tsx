@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FileUpload } from '../components/ui/FileUpload';
 import { VideoPreview } from '../components/video/VideoPreview';
 import { CaptionStyler } from '../components/video/CaptionStyler';
@@ -7,15 +7,8 @@ import { VideoUrlInput } from '../components/video/VideoUrlInput';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
-import { captionVideo, concatenateVideos } from '../lib/api/video';
-import type { 
-  CaptionSettings, 
-  TextReplacement, 
-  Caption, 
-  VideoPosition, 
-  CaptionStyle, 
-  TextAlignment 
-} from '../types/video';
+import { captionVideo, concatenateVideos, getJobProgress } from '../lib/api/video';
+import type { CaptionSettings, TextReplacement } from '../types/video';
 
 interface Video {
   id: string;
@@ -29,8 +22,10 @@ export default function VideoProcessing() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
+  const [captionText, setCaptionText] = useState<string>('');
+  const [replacements, setReplacements] = useState<TextReplacement[]>([]);
+  const [language, setLanguage] = useState<string>('auto');
 
-  const [captions, setCaptions] = useState<Caption[]>([]);
   const [captionSettings, setCaptionSettings] = useState<CaptionSettings>({
     line_color: '#ffffff',
     word_color: '#000000',
@@ -49,13 +44,10 @@ export default function VideoProcessing() {
     outline_width: 2,
     spacing: 2,
     angle: 0,
-    shadow_offset: 2
+    shadow_offset: 2,
+    x: 0,
+    y: 0
   });
-
-  const [textReplacements, setTextReplacements] = useState<TextReplacement[]>([]);
-  const [captionText, setCaptionText] = useState<string>('');
-  const [replacements, setReplacements] = useState<TextReplacement[]>([]);
-  const [language, setLanguage] = useState<string | undefined>(undefined);
 
   const handleFileSelect = async (files: File[]) => {
     const file = files[0];
@@ -72,6 +64,10 @@ export default function VideoProcessing() {
       toast.error('Failed to process video URL');
       console.error(error);
     }
+  };
+
+  const handleLanguageChange = (newLanguage: string | undefined) => {
+    setLanguage(newLanguage ?? 'auto');
   };
 
   useEffect(() => {
@@ -100,6 +96,11 @@ export default function VideoProcessing() {
       return;
     }
 
+    if (!captionText.trim()) {
+      toast.error('Please enter caption text');
+      return;
+    }
+
     setIsProcessing(true);
     setProcessingProgress(0);
 
@@ -109,13 +110,37 @@ export default function VideoProcessing() {
         captions: captionText,
         settings: captionSettings,
         replace: replacements.length > 0 ? replacements : undefined,
-        language
+        language: language === 'auto' ? undefined : language,
+        id: crypto.randomUUID() // Add request ID for tracking
       });
 
       if (response.response) {
         toast.success('Video processed successfully');
         // Handle the processed video URL
+        setVideoUrl(response.response);
       }
+
+      // Start polling for progress
+      const progressInterval = setInterval(async () => {
+        try {
+          const progress = await getJobProgress(response.job_id);
+          setProcessingProgress(progress.progress);
+          
+          if (progress.status === 'completed') {
+            clearInterval(progressInterval);
+            if (progress.output_url) {
+              setVideoUrl(progress.output_url);
+            }
+          } else if (progress.status === 'failed') {
+            clearInterval(progressInterval);
+            throw new Error(progress.message || 'Processing failed');
+          }
+        } catch (error) {
+          clearInterval(progressInterval);
+          throw error;
+        }
+      }, 1000);
+
     } catch (error) {
       setIsProcessing(false);
       if (error instanceof Error) {
@@ -172,20 +197,29 @@ export default function VideoProcessing() {
                 maxSize={100 * 1024 * 1024}
               />
               
-              <VideoUrlInput
-                value={videoSourceUrl}
-                onChange={setVideoSourceUrl}
-                onSubmit={() => {
-                  if (videoSourceUrl) {
-                    setVideoUrl(videoSourceUrl);
-                    if (videoFile) {
-                      URL.revokeObjectURL(videoUrl);
-                      setVideoFile(null);
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="Or enter video URL"
+                  value={videoSourceUrl}
+                  onChange={(e) => setVideoSourceUrl(e.target.value)}
+                  className="flex-1 px-3 py-2 border rounded-md"
+                />
+                <Button
+                  onClick={() => {
+                    if (videoSourceUrl) {
+                      setVideoUrl(videoSourceUrl);
+                      if (videoFile) {
+                        URL.revokeObjectURL(videoUrl);
+                        setVideoFile(null);
+                      }
+                      toast.success('Video URL loaded');
                     }
-                    toast.success('Video URL loaded');
-                  }
-                }}
-              />
+                  }}
+                >
+                  Load URL
+                </Button>
+              </div>
 
               {videoUrl && (
                 <VideoPreview
@@ -207,7 +241,7 @@ export default function VideoProcessing() {
                   replacements={replacements}
                   onReplacementsChange={setReplacements}
                   language={language}
-                  onLanguageChange={setLanguage}
+                  onLanguageChange={handleLanguageChange}
                 />
               </div>
 

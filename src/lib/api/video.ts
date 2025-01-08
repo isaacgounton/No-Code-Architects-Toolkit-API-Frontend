@@ -1,34 +1,11 @@
 import { useAuthStore } from '../store';
+import type { CaptionSettings, TextReplacement } from '../../types/video';
 
 export interface CaptionVideoRequest {
   video_url: string;
   captions?: string;
-  settings?: {
-    line_color?: string;
-    word_color?: string;
-    outline_color?: string;
-    all_caps?: boolean;
-    max_words_per_line?: number;
-    x?: number;
-    y?: number;
-    position?: string;
-    alignment?: string;
-    font_family?: string;
-    font_size?: number;
-    bold?: boolean;
-    italic?: boolean;
-    underline?: boolean;
-    strikeout?: boolean;
-    style?: string;
-    outline_width?: number;
-    spacing?: number;
-    angle?: number;
-    shadow_offset?: number;
-  };
-  replace?: Array<{
-    find: string;
-    replace: string;
-  }>;
+  settings?: CaptionSettings;  // Using our defined CaptionSettings type
+  replace?: TextReplacement[];  // Using our defined TextReplacement type
   webhook_url?: string;
   id?: string;
   language?: string;
@@ -68,6 +45,20 @@ export const captionVideo = async (params: CaptionVideoRequest): Promise<ApiResp
   
   if (!apiKey) {
     throw new Error('API key is required');
+  }
+
+  // Validate required settings
+  if (!params.video_url) {
+    throw new Error('Video URL is required');
+  }
+
+  // Clean up undefined values from settings
+  if (params.settings) {
+    Object.keys(params.settings).forEach(key => {
+      if (params.settings![key as keyof CaptionSettings] === undefined) {
+        delete params.settings![key as keyof CaptionSettings];
+      }
+    });
   }
 
   try {
