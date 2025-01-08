@@ -186,11 +186,6 @@ export const CaptionStyler: React.FC<CaptionStylerProps> = ({
             value={settings.outline_color || '#FFFFFF'}
             onChange={(color: string) => onChange({ ...settings, outline_color: color })}
           />
-          <ColorPicker
-            label="Background Color"
-            value={settings.box_color || '#000000'}  // ✓ Correctly implemented
-            onChange={(color: string) => onChange({ ...settings, box_color: color })}
-          />
         </div>
 
         <div className="space-y-4">
