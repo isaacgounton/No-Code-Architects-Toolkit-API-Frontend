@@ -132,7 +132,8 @@ export default function VideoProcessing() {
           }
         } catch (error) {
           clearInterval(progressInterval);
-          throw error;
+          console.error('Error fetching job progress:', error);
+          toast.error('Failed to fetch job progress. Please check the server logs for more details.');
         }
       }, 1000);
 
