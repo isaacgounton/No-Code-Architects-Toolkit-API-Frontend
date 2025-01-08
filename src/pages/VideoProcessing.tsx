@@ -99,6 +99,14 @@ export default function VideoProcessing() {
 
     setIsProcessing(true);
     setProcessingProgress(0);
+    const interval: NodeJS.Timeout | undefined = setInterval(() => {
+        setProcessingProgress(prev => {
+          if (prev >= 90) {
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 500);
 
     try {
       const response = await captionVideo({
@@ -113,6 +121,10 @@ export default function VideoProcessing() {
       if (response.response) {
         toast.success('Video processed successfully');
         setVideoUrl(response.response);
+        setProcessingProgress(100);
+        if (interval) {
+          clearInterval(interval);
+        }
       }
     } catch (error) {
       setIsProcessing(false);
@@ -120,6 +132,9 @@ export default function VideoProcessing() {
         toast.error(error.message);
       } else {
         toast.error('Failed to process video');
+      }
+      if (interval) {
+        clearInterval(interval);
       }
     }
   };
@@ -230,7 +245,7 @@ export default function VideoProcessing() {
                 {isProcessing && (
                   <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                     <div 
-                      className="bg-blue-600 h-2.5 rounded-full" 
+                      className="bg-blue-600 h-2.5 rounded-full video-progress-bar"
                       style={{ width: `${processingProgress}%` }}
                     />
                   </div>
