@@ -53,6 +53,9 @@ export default function VideoProcessing() {
   });
 
   const [textReplacements, setTextReplacements] = useState<TextReplacement[]>([]);
+  const [captionText, setCaptionText] = useState<string>('');
+  const [replacements, setReplacements] = useState<TextReplacement[]>([]);
+  const [language, setLanguage] = useState<string | undefined>(undefined);
 
   const handleFileSelect = async (files: File[]) => {
     const file = files[0];
@@ -103,10 +106,10 @@ export default function VideoProcessing() {
     try {
       const response = await captionVideo({
         video_url: videoUrl,
-        captions: captions.map(c => c.text).join('\n'),
+        captions: captionText,
         settings: captionSettings,
-        replace: textReplacements.length > 0 ? textReplacements : undefined,
-        language: 'en' // You might want to make this configurable
+        replace: replacements.length > 0 ? replacements : undefined,
+        language
       });
 
       if (response.response) {
@@ -199,6 +202,12 @@ export default function VideoProcessing() {
                 <CaptionStyler
                   settings={captionSettings}
                   onChange={setCaptionSettings}
+                  captions={captionText}
+                  onCaptionsChange={setCaptionText}
+                  replacements={replacements}
+                  onReplacementsChange={setReplacements}
+                  language={language}
+                  onLanguageChange={setLanguage}
                 />
               </div>
 

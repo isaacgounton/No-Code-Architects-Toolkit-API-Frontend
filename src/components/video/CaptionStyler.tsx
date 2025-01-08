@@ -4,14 +4,30 @@ import { Select } from '../ui/Select';
 import { Switch } from '../ui/Switch';
 import { ColorPicker } from '../ui/ColorPicker';
 import { Label } from '../ui/Label';
-import type { CaptionSettings, VideoPosition, CaptionStyle, TextAlignment } from '../../types/video';
+import { Button } from '../ui/Button';
+import type { CaptionSettings, VideoPosition, CaptionStyle, TextAlignment, TextReplacement } from '../../types/video';
 
 interface CaptionStylerProps {
   settings: CaptionSettings;
   onChange: (settings: CaptionSettings) => void;
+  onCaptionsChange: (text: string) => void;
+  onReplacementsChange: (replacements: TextReplacement[]) => void;
+  onLanguageChange: (language: string | undefined) => void;
+  captions: string;
+  replacements: TextReplacement[];  // This is required but might be empty
+  language?: string;
 }
 
-export const CaptionStyler: React.FC<CaptionStylerProps> = ({ settings, onChange }) => {
+export const CaptionStyler: React.FC<CaptionStylerProps> = ({
+  settings,
+  onChange,
+  onCaptionsChange,
+  onReplacementsChange,
+  onLanguageChange,
+  captions = '',  // Default value
+  replacements = [],  // Default value
+  language
+}) => {
   const fontFamilies = [
     { value: 'Arial', label: 'Arial' },
     { value: 'Arial Black', label: 'Arial Black' },
@@ -64,8 +80,92 @@ export const CaptionStyler: React.FC<CaptionStylerProps> = ({ settings, onChange
     { value: 'right' as TextAlignment, label: 'Right' }
   ];
 
+  const languageOptions = [
+    { value: 'auto', label: 'Auto Detect' },  // Changed from empty string to 'auto'
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Spanish' },
+    { value: 'fr', label: 'French' },
+    { value: 'de', label: 'German' },
+    { value: 'it', label: 'Italian' },
+    { value: 'pt', label: 'Portuguese' },
+    { value: 'ru', label: 'Russian' },
+    { value: 'ja', label: 'Japanese' },
+    { value: 'ko', label: 'Korean' },
+    { value: 'zh', label: 'Chinese' }
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Captions Input Group */}
+      <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
+        <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100">Caption Text</h3>
+        
+        <div className="space-y-4">
+          <textarea
+            value={captions}
+            onChange={(e) => onCaptionsChange(e.target.value)}
+            placeholder="Enter your captions here..."
+            className="w-full h-32 px-3 py-2 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700"
+          />
+
+          <Select
+            label="Caption Language"
+            value={language || 'auto'}  // Changed default value to 'auto'
+            options={languageOptions}
+            onValueChange={(value) => onLanguageChange(value === 'auto' ? undefined : value)}
+          />
+        </div>
+      </div>
+
+      {/* Text Replacements Group */}
+      <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
+        <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100">Text Replacements</h3>
+        
+        <div className="space-y-4">
+          {replacements?.map((replacement, index) => (
+            <div key={index} className="flex gap-2">
+              <Input
+                placeholder="Find text"
+                value={replacement.find}
+                onChange={(e) => {
+                  const newReplacements = [...replacements];
+                  newReplacements[index].find = e.target.value;
+                  onReplacementsChange(newReplacements);
+                }}
+                className="flex-1"
+              />
+              <Input
+                placeholder="Replace with"
+                value={replacement.replace}
+                onChange={(e) => {
+                  const newReplacements = [...replacements];
+                  newReplacements[index].replace = e.target.value;
+                  onReplacementsChange(newReplacements);
+                }}
+                className="flex-1"
+              />
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => {
+                  const newReplacements = replacements.filter((_, i) => i !== index);
+                  onReplacementsChange(newReplacements);
+                }}
+              >
+                ×
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            onClick={() => onReplacementsChange([...(replacements || []), { find: '', replace: '' }])}
+            className="w-full"
+          >
+            Add Replacement
+          </Button>
+        </div>
+      </div>
+
       {/* Text Appearance Group */}
       <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
         <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100">Text Appearance</h3>
