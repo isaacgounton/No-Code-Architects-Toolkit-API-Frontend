@@ -103,7 +103,7 @@ export default function VideoProcessing() {
     try {
       const response = await captionVideo({
         video_url: videoUrl,
-        captions: captionText || undefined,  // Only send if there's text
+        captions: captionText || undefined,  // Will be undefined if empty string
         settings: captionSettings,
         replace: replacements.length > 0 ? replacements : undefined,
         language: language === 'auto' ? undefined : language,
