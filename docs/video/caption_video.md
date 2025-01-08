@@ -20,7 +20,7 @@ The `/v1/video/caption` endpoint is part of the Video API and is responsible for
 The request body must be a JSON object with the following properties:
 
 - `video_url` (string, required): The URL of the video file to be captioned.
-- `captions` (string, optional): The caption text to be added to the video.
+- `captions` (string, optional): Optional caption text to be added to the video. If not provided, the video will be processed with any other provided settings but without captions.
 - `settings` (object, optional): An object containing various styling options for the captions. See the schema below for available options.
 - `replace` (array, optional): An array of objects with `find` and `replace` properties, specifying text replacements to be made in the captions.
 - `webhook_url` (string, optional): A URL to receive a webhook notification when the captioning process is complete.
@@ -274,7 +274,7 @@ The endpoint handles the following common errors:
 ## 6. Usage Notes
 
 - The `video_url` parameter is required, and it should be a valid URL pointing to a video file.
-- The `captions` parameter is optional. If not provided, the video will be processed without captions.
+- The `captions` parameter is optional. You can provide it to add captions to the video, or omit it to process the video with other settings (like style, effects, etc.) without captions.
 - The `settings` parameter allows you to customize the appearance and behavior of the captions. Refer to the settings schema for available options.
 - The `replace` parameter allows you to specify text replacements to be made in the captions.
 - The `webhook_url` parameter is optional. If provided, a webhook notification will be sent to the specified URL when the captioning process is complete.

@@ -3,7 +3,7 @@ import type { CaptionSettings, TextReplacement } from '../../types/video';
 
 export interface CaptionVideoRequest {
   video_url: string;
-  captions?: string;
+  captions?: string;  // ✓ Already optional
   settings?: CaptionSettings;  // Using our defined CaptionSettings type
   replace?: TextReplacement[];  // Using our defined TextReplacement type
   webhook_url?: string;
@@ -47,10 +47,11 @@ export const captionVideo = async (params: CaptionVideoRequest): Promise<ApiResp
     throw new Error('API key is required');
   }
 
-  // Validate required settings
   if (!params.video_url) {
     throw new Error('Video URL is required');
   }
+
+  // Remove validation for captions since it's optional now
 
   // Clean up undefined values from settings
   if (params.settings) {

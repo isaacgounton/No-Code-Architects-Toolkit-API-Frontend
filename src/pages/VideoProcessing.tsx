@@ -97,18 +97,13 @@ export default function VideoProcessing() {
       return;
     }
 
-    if (!captionText.trim()) {
-      toast.error('Please enter caption text');
-      return;
-    }
-
     setIsProcessing(true);
     setProcessingProgress(0);
 
     try {
       const response = await captionVideo({
         video_url: videoUrl,
-        captions: captionText,
+        captions: captionText || undefined,  // Only send if there's text
         settings: captionSettings,
         replace: replacements.length > 0 ? replacements : undefined,
         language: language === 'auto' ? undefined : language,
