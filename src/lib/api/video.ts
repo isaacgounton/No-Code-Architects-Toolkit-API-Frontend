@@ -79,7 +79,7 @@ export const captionVideo = async (params: CaptionVideoRequest): Promise<ApiResp
         'Accept': 'application/json',
       },
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'omit', // Changed from 'include' to 'omit'
       body: JSON.stringify(params),
     });
 
@@ -117,7 +117,7 @@ export const concatenateVideos = async (params: ConcatenateVideosRequest): Promi
         'Accept': 'application/json',
       },
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'omit', // Changed from 'include' to 'omit'
       body: JSON.stringify(params),
     });
 
@@ -154,7 +154,7 @@ export const getJobProgress = async (jobId: string): Promise<ProgressResponse> =
         'Accept': 'application/json',
       },
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'omit', // Changed from 'include' to 'omit'
     });
 
     if (!response.ok) {

@@ -40,7 +40,7 @@ export const convertImageToVideo = async (params: ImageToVideoRequest): Promise<
         'Accept': 'application/json',
       },
       mode: 'cors', // Explicitly set CORS mode
-      credentials: 'include', // Include credentials if needed
+      credentials: 'omit', // Changed from 'include' to 'omit'
       body: JSON.stringify(params), // Add the params to the request body
     });
 
