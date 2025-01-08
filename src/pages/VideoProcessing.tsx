@@ -26,6 +26,7 @@ export default function VideoProcessing() {
   const [replacements, setReplacements] = useState<TextReplacement[]>([]);
   const [language, setLanguage] = useState<string>('auto');
   const [isLoading, setIsLoading] = useState(false);
+  const [isProcessingComplete, setIsProcessingComplete] = useState(false);
 
   const [captionSettings, setCaptionSettings] = useState<CaptionSettings>({
     line_color: '#ffffff',
@@ -129,6 +130,7 @@ export default function VideoProcessing() {
           toast.success('Video processed successfully');
           setVideoUrl(response.response);
           setProcessingProgress(100);
+          setIsProcessingComplete(true);
           if (interval) {
             clearInterval(interval);
           }
@@ -262,7 +264,7 @@ export default function VideoProcessing() {
               </div>
             </div>
           </div>
-          {videoUrl && (
+          {isProcessingComplete && videoUrl && (
             <div className="border rounded-lg p-4">
               <h2 className="text-lg font-semibold mb-4">
                 Generated Video
