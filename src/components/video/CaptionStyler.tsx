@@ -170,7 +170,7 @@ export const CaptionStyler: React.FC<CaptionStylerProps> = ({
       <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
         <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100">Text Appearance</h3>
         
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <ColorPicker
             label="Line Color"
             value={settings.line_color || '#FFFFFF'}
@@ -183,8 +183,13 @@ export const CaptionStyler: React.FC<CaptionStylerProps> = ({
           />
           <ColorPicker
             label="Outline Color"
-            value={settings.outline_color || '#000000'}
+            value={settings.outline_color || '#FFFFFF'}
             onChange={(color: string) => onChange({ ...settings, outline_color: color })}
+          />
+          <ColorPicker
+            label="Background Color"
+            value={settings.box_color || '#000000'}  // ✓ Correctly implemented
+            onChange={(color: string) => onChange({ ...settings, box_color: color })}
           />
         </div>
 

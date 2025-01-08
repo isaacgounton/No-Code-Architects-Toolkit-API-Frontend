@@ -11,6 +11,7 @@ export interface CaptionSettings {
   line_color?: string;
   word_color?: string;
   outline_color?: string;
+  box_color?: string;  // ✓ Correctly defined
   all_caps?: boolean;
   max_words_per_line?: number;
   x?: number;

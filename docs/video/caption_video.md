@@ -17,7 +17,7 @@ The `/v1/video/caption` endpoint is part of the Video API and is responsible for
 
 ### Body Parameters
 
-The request body should be a JSON object with the following properties:
+The request body must be a JSON object with the following properties:
 
 - `video_url` (string, required): The URL of the video file to be captioned.
 - `captions` (string, optional): The caption text to be added to the video.
@@ -36,6 +36,7 @@ The request body should be a JSON object with the following properties:
         "line_color": {"type": "string"},
         "word_color": {"type": "string"},
         "outline_color": {"type": "string"},
+        "box_color": {"type": "string"},
         "all_caps": {"type": "boolean"},
         "max_words_per_line": {"type": "integer"},
         "x": {"type": "integer"},
@@ -81,6 +82,7 @@ The request body should be a JSON object with the following properties:
         "line_color": "#FFFFFF",
         "word_color": "#000000",
         "outline_color": "#000000",
+        "box_color": "#000000",
         "all_caps": false,
         "max_words_per_line": 10,
         "x": 20,

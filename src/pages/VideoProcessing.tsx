@@ -29,7 +29,8 @@ export default function VideoProcessing() {
   const [captionSettings, setCaptionSettings] = useState<CaptionSettings>({
     line_color: '#ffffff',
     word_color: '#000000',
-    outline_color: '#000000',
+    outline_color: '#ffffff',
+    box_color: '#000000',
     all_caps: false,
     max_words_per_line: 10,
     position: 'bottom_center',
